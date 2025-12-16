@@ -56,8 +56,8 @@ class MyApp extends StatelessWidget {
         theme: AppTheme.lightTheme,
 
         // home: const LoginScreen(),
-        home: const DashboardScreen(),
-        //home: const DetailViewScreen(),
+        //home: const DashboardScreen(),
+        home: const DetailViewScreen(),
 
         routes: {
           // '/dashboard': (_) => const DashboardScreen(),

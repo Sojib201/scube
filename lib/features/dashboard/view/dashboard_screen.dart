@@ -187,6 +187,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildBlocContent() {
     return BlocBuilder<DashboardBloc, DashboardState>(
       builder: (context, state) {
+
+        List<SourceItem> mockSources = [];
+        double mockTodayTotal = 5530.0;
+
         if (state is DashboardLoading) {
           // Loading state must be wrapped in Expanded
           return Expanded(
@@ -199,12 +203,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
           );
         }
 
-        List<SourceItem> mockSources = [];
-        double mockTodayTotal = 5530.0;
+        if (state is DashboardEmpty) {
+          // Empty state must be wrapped in Expanded
+          return Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(top: 50.h),
+              child: Center(
+                child: Image.asset(
+                AppAssets.noData,
+                width: 300.w,
+                height: 300.h,
+                fit: BoxFit.contain,
+              ),),
+            ),
+          );
+        }
 
-        // FIX: Replaced outer Expanded with Flexible to resolve the error.
-        // It allows the parent Column to determine the size, while maintaining
-        // the inner Expanded for the scrollable area.
         return Flexible(
           fit: FlexFit.loose, // This is key for fixing the error in nested Columns
           child: Column(
@@ -257,16 +271,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         );
 
-        if (state is DashboardEmpty) {
-          // Empty state must be wrapped in Expanded
-          return Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(top: 50.h),
-              child: Center(child: _buildEmptyState()),
-            ),
-          );
-        }
-        return Container();
+
       },
     );
   }
@@ -612,7 +617,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 title,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 10.sp,
+                  fontSize: 14.sp,
                   //fontWeight: FontWeight.w600,
                   color: AppColors.darkGrey,
                 ),
