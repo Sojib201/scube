@@ -55,9 +55,9 @@ class MyApp extends StatelessWidget {
         title: 'SCUBE',
         theme: AppTheme.lightTheme,
 
-        // home: const LoginScreen(),
+        home: const LoginScreen(),
         //home: const DashboardScreen(),
-        home: const DetailViewScreen(),
+        //home: const DetailViewScreen(),
 
         routes: {
           // '/dashboard': (_) => const DashboardScreen(),
