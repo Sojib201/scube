@@ -21,10 +21,6 @@ class BlocContentWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<DashboardBloc, DashboardState>(
       builder: (context, state) {
-        // Mock data
-        // List<SourceItem> mockSources = [];
-        // double mockTodayTotal = 5530.0;
-
         if (state is DashboardLoading) {
           return Expanded(
             child: Padding(
@@ -52,9 +48,7 @@ class BlocContentWidget extends StatelessWidget {
           );
         }
 
-        // DashboardLoaded state or initial state with mock data
         return SummaryContent(
-          // Here you would pass actual state data instead of mock
           todayTotal: 5530.0,
           activeToggle: activeToggle,
           onToggleChange: onToggleChange,

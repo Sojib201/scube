@@ -39,7 +39,6 @@ class SummaryContent extends StatelessWidget {
       fit: FlexFit.loose,
       child: Column(
         children: [
-          // Fixed Header Section
           Column(
             children: [
               SizedBox(height: 5.h),
@@ -64,7 +63,6 @@ class SummaryContent extends StatelessWidget {
             ],
           ),
 
-          // Scrollable List Section
           Expanded(
             child: SingleChildScrollView(
               child: Column(
@@ -109,7 +107,6 @@ class SummaryContent extends StatelessWidget {
           status: item['status'],
           iconColor: item['iconColor'],
           badgeColor: item['badgeColor'],
-          // Navigate only if it's the 'Data View' item under the 'Source' toggle
           isNavigatable: activeToggle == 'Source' && item['title'] == 'Data View',
         ),
       );

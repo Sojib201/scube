@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:scub/features/dashboard/view/empty_dashboard.dart';
 import '../../../../core/constants/app_assets.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../details/view/details_view_screen.dart';
 
 class ShortcutButtonsGrid extends StatelessWidget {
   const ShortcutButtonsGrid({super.key});
@@ -29,6 +31,7 @@ class ShortcutButtonsGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = shortcuts[index];
         return _buildShortcutButton(
+          context,
           item['title'] as String,
           item['icon'] as String,
         );
@@ -36,7 +39,7 @@ class ShortcutButtonsGrid extends StatelessWidget {
     );
   }
 
-  Widget _buildShortcutButton(String title, String icon) {
+  Widget _buildShortcutButton(BuildContext context,String title, String icon) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w),
       decoration: BoxDecoration(
@@ -53,7 +56,12 @@ class ShortcutButtonsGrid extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () {
-          // Placeholder functionality
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const EmptyDashboardScreen(),
+            ),
+          );
         },
         borderRadius: BorderRadius.circular(15.r),
         child: Row(

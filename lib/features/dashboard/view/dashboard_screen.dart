@@ -71,7 +71,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               size: 28.sp,
             ),
             onPressed: () {
-              // Handle notifications
             },
           ),
         ],
@@ -90,7 +89,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   child: Column(
                     children: [
-                      // 2. Tab Bar Widget
                       TabBarWidget(
                         activeTab: _activeTab,
                         onTabChange: _setActiveTab,
@@ -128,7 +126,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
 
-              // 4. Shortcut Buttons Grid
               SizedBox(height: 16.h),
               const ShortcutButtonsGrid(),
             ],
