@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-// import 'package:scub/core/constants/app_colors.dart'; // Using AppColor defined below
-import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../details/view/details_view_screen.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
-import '../bloc/dashboard_state.dart';
+import '../widgets/bloc_content_widget.dart';
+import '../widgets/placeholder_content.dart';
+import '../widgets/shortcut_buttons_grid.dart';
+import '../widgets/tab_bar_widget.dart';
 
 class SourceItem {}
 
@@ -20,7 +19,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  // UI State Variables
+  // UI State Variables (Must remain in State class)
   String _activeTab = 'Summary'; // Summary, SLD, Data
   String _activeToggle = 'Source'; // Source, Load
 
@@ -28,20 +27,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Ensure BLoC is available before accessing it
       if (context.mounted) {
-         context.read<DashboardBloc>().add(LoadDashboardData());
+        context.read<DashboardBloc>().add(LoadDashboardData());
       }
     });
   }
 
-  // --- Main Build Method (UPDATED FOR INNER SCROLLABILITY) ---
+  void _setActiveTab(String title) {
+    setState(() {
+      _activeTab = title;
+      if (title == 'Summary') {
+        _activeToggle = 'Source'; // Default back to Source on Summary
+      }
+    });
+  }
+
+  void _setActiveToggle(String title) {
+    setState(() {
+      _activeToggle = title;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.lightGrey,
       appBar: AppBar(
-        //elevation: 6,
         backgroundColor: AppColors.white,
         title: Text(
           'SCM',
@@ -60,17 +71,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               size: 28.sp,
             ),
             onPressed: () {
-              /* Handle notifications */
+              // Handle notifications
             },
           ),
         ],
-      ),
+      ), // 1. AppBar Widget
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(16.r),
           child: Column(
             children: [
-              // Outer Expanded wrapping the main content area
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
@@ -79,37 +89,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Column(
-                    // Inner Column
                     children: [
-                      _buildTabBar(),
+                      // 2. Tab Bar Widget
+                      TabBarWidget(
+                        activeTab: _activeTab,
+                        onTabChange: _setActiveTab,
+                      ),
+
                       Expanded(
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 10.w),
                           child: Column(
                             children: [
-                              // Content changes based on the active tab
-                              if (_activeTab == 'Summary') ...[
-                                // _buildBlocContent() now returns an Expanded widget
-                                _buildBlocContent(),
-                              ]
-                              // Use Expanded for placeholder content to fill space
+                              // 3. Content Area based on Active Tab
+                              if (_activeTab == 'Summary')
+                                BlocContentWidget(
+                                  activeToggle: _activeToggle,
+                                  onToggleChange: _setActiveToggle,
+                                )
                               else if (_activeTab == 'SLD')
                                 Expanded(
-                                  child: _buildPlaceholderContent(
-                                    'SLD View',
-                                    AppAssets.noData,
+                                  child: PlaceholderContent(
+                                    title: 'SLD View',
                                   ),
                                 )
-
-                              // Use Expanded for placeholder content to fill space
                               else if (_activeTab == 'Data')
                                   Expanded(
-                                    child: _buildPlaceholderContent(
-                                      'Raw Data',
-                                      AppAssets.noData,
+                                    child: PlaceholderContent(
+                                      title: 'Raw Data',
                                     ),
                                   ),
-
                             ],
                           ),
                         ),
@@ -119,584 +128,719 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
 
-              // The shortcut buttons Grid is now at the bottom (fixed).
+              // 4. Shortcut Buttons Grid
               SizedBox(height: 16.h),
-              _buildShortcutButtonsGrid(),
-              //SizedBox(height: 10.h), // Extra space at the bottom for safety
+              const ShortcutButtonsGrid(),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  // --- 2. Tab Bar Widget (No change) ---
-  Widget _buildTabBar() {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.grey),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildTabItem('Summary'),
-          _buildTabItem('SLD'),
-          _buildTabItem('Data'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabItem(String title) {
-    // ... (unchanged)
-    final isActive = _activeTab == title;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _activeTab = title;
-            if (title == 'Summary') {
-              _activeToggle = 'Source'; // Default back to Source on Summary
-            }
-          });
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 8.h),
-          decoration: BoxDecoration(
-            color: isActive ? AppColors.primary : Colors.transparent,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(11.r),
-              topRight: Radius.circular(11.r),
-            ),
-          ),
-          child: Center(
-            child: Text(
-              title,
-              style: TextStyle(
-                color: isActive ? AppColors.white : AppColors.darkGrey,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBlocContent() {
-    return BlocBuilder<DashboardBloc, DashboardState>(
-      builder: (context, state) {
-
-        List<SourceItem> mockSources = [];
-        double mockTodayTotal = 5530.0;
-
-        if (state is DashboardLoading) {
-          // Loading state must be wrapped in Expanded
-          return Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(top: 50.h),
-              child: Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
-              ),
-            ),
-          );
-        }
-
-        if (state is DashboardEmpty) {
-          // Empty state must be wrapped in Expanded
-          return Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(top: 50.h),
-              child: Center(
-                child: Image.asset(
-                AppAssets.noData,
-                width: 300.w,
-                height: 300.h,
-                fit: BoxFit.contain,
-              ),),
-            ),
-          );
-        }
-
-        return Flexible(
-          fit: FlexFit.loose, // This is key for fixing the error in nested Columns
-          child: Column(
-            children: [
-              // 1. FIXED HEIGHT HEADER (Title & Ring Chart) - Takes intrinsic height
-              Column(
-                children: [
-                  SizedBox(height: 5.h),
-                  _buildElectricityTitle(),
-                  SizedBox(height:10.h),// Fixed height
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      border: Border.all(color: AppColors.grey, width: 0.6.w),
-                    ),
-                  ),
-                  SizedBox(height: 10.h),
-                  _buildRingChart(mockTodayTotal / 1000),
-                  SizedBox(height: 16.h),
-                  _buildSourceLoadToggle(),
-                  SizedBox(height:5.h),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      border: Border.all(color: AppColors.grey, width: 0.6.w),
-                    ),
-                  ),
-                  SizedBox(height:8.h),
-                ],
-              ),
-
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-
-                      // List changes based on active toggle
-                      if (_activeToggle == 'Source')
-                        _buildSourcesList(mockSources)
-                      else
-                      // FIX: Corrected list logic to ensure only one list is built.
-                        _buildLoadsList(mockSources),
-
-                      SizedBox(height: 10.h), // Padding at the bottom of the scroll view
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-
-
-      },
-    );
-  }
-
-  Widget _buildElectricityTitle() {
-    // ... (unchanged)
-    return Align(
-      alignment: Alignment.center,
-      child: Padding(
-        padding: EdgeInsets.only(left: 10.w),
-        child: Text(
-          'Electricity',
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w500,
-            color: AppColors.grey,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRingChart(double totalPower) {
-    // ... (unchanged)
-    return Center(
-      child: Container(
-        height: 140.h,
-        width: 140.w,
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.deepBlue, width: 15.w),
-          shape: BoxShape.circle,
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Total Power',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: AppColors.darkGrey.withOpacity(0.7),
-                ),
-              ),
-              Text(
-                '5.53 kW',
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // --- Source/Load Toggle (No change) ---
-  Widget _buildSourceLoadToggle() {
-    // ... (unchanged)
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 10.w),
-      decoration: BoxDecoration(
-        color: AppColors.lightGrey,
-        borderRadius: BorderRadius.circular(30.r), // Highly rounded
-      ),
-      child: Row(
-        children: [
-          _buildToggleItemButton('Source'),
-          SizedBox(width: 8.w),
-          _buildToggleItemButton('Load'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildToggleItemButton(String title) {
-    // ... (unchanged)
-    final isActive = _activeToggle == title;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _activeToggle = title;
-          });
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 8.h),
-          decoration: BoxDecoration(
-            color: isActive ? AppColors.primary : AppColors.lightGrey,
-            borderRadius: BorderRadius.circular(30.r),
-          ),
-          child: Center(
-            child: Text(
-              title,
-              style: TextStyle(
-                color: isActive ? AppColors.white : AppColors.darkGrey,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // --- List Views (No change) ---
-  Widget _buildSourcesList(List<SourceItem> sources) {
-    // ... (unchanged)
-    return Column(
-      children: [
-        _buildSourceListItem(
-          icon: AppAssets.solarCell,
-          title: 'Data View',
-          status: 'Active',
-          iconColor: AppColors.primary,
-          badgeColor: AppColors.purple,
-        ),
-        SizedBox(height: 10.h),
-        _buildSourceListItem(
-          icon: AppAssets.asset2,
-          title: 'Data Type 2',
-          status: 'Active',
-          iconColor: AppColors.orange,
-          badgeColor: AppColors.primary,
-        ),
-        SizedBox(height: 10.h),
-        _buildSourceListItem(
-          icon: AppAssets.power,
-          title: 'Data Type 3',
-          status: 'Inactive',
-          iconColor: AppColors.red,
-          badgeColor: AppColors.red,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLoadsList(List<SourceItem> sources) {
-    // ... (unchanged)
-    return Column(
-      children: [
-        _buildSourceListItem(
-          icon: AppAssets.solarCell,
-          title: 'Motor Load 1',
-          status: 'Active',
-          iconColor: Colors.red,
-          badgeColor: AppColors.purple,
-        ),
-        SizedBox(height: 10.h),
-        _buildSourceListItem(
-          icon: AppAssets.power,
-          title: 'Lighting Circuit',
-          status: 'Active',
-          iconColor: Colors.orange,
-          badgeColor: AppColors.primary,
-        ),
-        SizedBox(height: 10.h),
-        _buildSourceListItem(
-          icon: AppAssets.asset2,
-          title: 'AC Unit 3',
-          status: 'Inactive',
-          iconColor: AppColors.grey,
-          badgeColor: AppColors.red,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSourceListItem({
-    //required IconData icon,
-    required String icon,
-    required String title,
-    required String status,
-    required Color iconColor,
-    required Color badgeColor,
-  }) {
-    // ... (unchanged)
-    const String data1 = '55505.63';
-    const String data2 = '58805.63';
-    final bool isActive = status == 'Active';
-
-    return InkWell(
-      onTap: () {
-
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const DetailViewScreen(),
-            ),
-          );
-
-      },
-      child: Container(
-        padding: EdgeInsets.all(8.w),
-        decoration: BoxDecoration(
-          color: AppColors.lightGrey,
-          borderRadius: BorderRadius.circular(4.r),
-          border: Border.all(color: AppColors.grey, width: 1.w),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 5,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Image.asset(
-              icon,
-              width: 30.w,
-              height: 30.h,
-              fit: BoxFit.contain,
-            ),
-            SizedBox(width: 15.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.darkGrey,
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        isActive ? '(Active)' : '(Inactive)',
-                        style: TextStyle(
-                          color: isActive ? AppColors.primary : AppColors.red,
-                          fontSize: 10.sp,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 5.h),
-                  Text(
-                    'Data 1 : $data1',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: AppColors.darkGrey.withOpacity(0.7),
-                    ),
-                  ),
-                  Text(
-                    'Data 2 : $data2',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: AppColors.darkGrey.withOpacity(0.7),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios,
-              color: AppColors.darkGrey.withOpacity(0.5),
-              size: 20.sp,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // --- Shortcut Buttons Grid (No change) ---
-  Widget _buildShortcutButtonsGrid() {
-    // ... (unchanged)
-    final List<Map<String, dynamic>> shortcuts = [
-      {
-        'title': 'Analysis Pro',
-        'icon': AppAssets.chart,
-      },
-      {
-        'title': 'G. Generator',
-        'icon':AppAssets.generator,
-      },
-      {
-        'title': 'Plant Summery',
-        'icon': AppAssets.charge,
-      },
-      {
-        'title': 'Natural Gas',
-        'icon': AppAssets.fire,
-      },
-      {
-        'title': 'D. Generator',
-        'icon': AppAssets.generator,
-      },
-      {
-        'title': 'Water Process',
-        'icon': AppAssets.waterProcess,
-      },
-    ];
-
-    return GridView.builder(
-      shrinkWrap: true,
-      //physics: const NeverScrollableScrollPhysics(),
-      //padding: EdgeInsets.symmetric(horizontal: 10.w),
-      itemCount: shortcuts.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 4,
-        crossAxisSpacing: 10.w,
-        mainAxisSpacing: 10.h,
-      ),
-      itemBuilder: (context, index) {
-        final item = shortcuts[index];
-        return _buildShortcutButton(
-          item['title'] as String,
-          item['icon'] as String,
-        );
-      },
-    );
-  }
-
-  Widget _buildShortcutButton(String title, String icon) {
-    // ... (unchanged)
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border.all(color: AppColors.grey,width: 0.6.w),
-        borderRadius: BorderRadius.circular(8.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-        child: InkWell(
-          onTap: () {
-            // Placeholder functionality
-          },
-          borderRadius: BorderRadius.circular(15.r),
-          child: Row(
-            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Image.asset(
-                icon,
-                width: 20.w,
-                height: 20.h,
-                fit: BoxFit.contain,
-              ),
-              SizedBox(width: 8.h),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  //fontWeight: FontWeight.w600,
-                  color: AppColors.darkGrey,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-    );
-  }
-
-  // Placeholder content for SLD/Data tabs
-  Widget _buildPlaceholderContent(String title, String icon) {
-    return Container(
-      //margin: EdgeInsets.symmetric(horizontal: 0.w),
-      decoration: BoxDecoration(
-        //color: AppColors.lightGrey,
-        borderRadius: BorderRadius.circular(15.r),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Image.asset(
-            icon,
-            width: 100.w,
-            height: 100.h,
-            fit: BoxFit.contain,
-          ),
-          SizedBox(height: 10.h),
-          Text(
-            textAlign: TextAlign.center,
-            '$title Content is under development.',
-            style: TextStyle(fontSize: 18.sp, color: AppColors.grey),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    // ... (unchanged)
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          Icons.search_off,
-          size: 100.sp,
-          color: AppColors.grey.withOpacity(0.5),
-        ),
-        SizedBox(height: 20.h),
-        Text(
-          'No data to show, please wait.',
-          style: TextStyle(fontSize: 18.sp, color: AppColors.grey),
-          textAlign: TextAlign.center,
-        ),
-      ],
     );
   }
 }
 
 
 
+///2nd old
+// import 'package:flutter/material.dart';
+// import 'package:flutter_bloc/flutter_bloc.dart';
+// import 'package:flutter_screenutil/flutter_screenutil.dart';
+//
+// // import 'package:scub/core/constants/app_colors.dart'; // Using AppColor defined below
+// import '../../../core/constants/app_assets.dart';
+// import '../../../core/constants/app_colors.dart';
+// import '../../details/view/details_view_screen.dart';
+// import '../bloc/dashboard_bloc.dart';
+// import '../bloc/dashboard_event.dart';
+// import '../bloc/dashboard_state.dart';
+//
+// class SourceItem {}
+//
+// class DashboardScreen extends StatefulWidget {
+//   const DashboardScreen({super.key});
+//
+//   @override
+//   State<DashboardScreen> createState() => _DashboardScreenState();
+// }
+//
+// class _DashboardScreenState extends State<DashboardScreen> {
+//   // UI State Variables
+//   String _activeTab = 'Summary'; // Summary, SLD, Data
+//   String _activeToggle = 'Source'; // Source, Load
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       // Ensure BLoC is available before accessing it
+//       if (context.mounted) {
+//          context.read<DashboardBloc>().add(LoadDashboardData());
+//       }
+//     });
+//   }
+//
+//   // --- Main Build Method (UPDATED FOR INNER SCROLLABILITY) ---
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: AppColors.lightGrey,
+//       appBar: AppBar(
+//         //elevation: 6,
+//         backgroundColor: AppColors.white,
+//         title: Text(
+//           'SCM',
+//           style: TextStyle(
+//             color: Colors.black,
+//             fontSize: 22.sp,
+//             fontWeight: FontWeight.w500,
+//           ),
+//         ),
+//         centerTitle: true,
+//         actions: [
+//           IconButton(
+//             icon: Icon(
+//               Icons.notifications_none,
+//               color: AppColors.darkGrey,
+//               size: 28.sp,
+//             ),
+//             onPressed: () {
+//               /* Handle notifications */
+//             },
+//           ),
+//         ],
+//       ),
+//       body: SafeArea(
+//         child: Padding(
+//           padding: EdgeInsets.all(16.r),
+//           child: Column(
+//             children: [
+//               // Outer Expanded wrapping the main content area
+//               Expanded(
+//                 child: Container(
+//                   decoration: BoxDecoration(
+//                     color: AppColors.white,
+//                     border: Border.all(color: AppColors.grey, width: 1.w),
+//                     borderRadius: BorderRadius.circular(12.r),
+//                   ),
+//                   child: Column(
+//                     // Inner Column
+//                     children: [
+//                       _buildTabBar(),
+//                       Expanded(
+//                         child: Padding(
+//                           padding: EdgeInsets.symmetric(horizontal: 10.w),
+//                           child: Column(
+//                             children: [
+//                               // Content changes based on the active tab
+//                               if (_activeTab == 'Summary') ...[
+//                                 // _buildBlocContent() now returns an Expanded widget
+//                                 _buildBlocContent(),
+//                               ]
+//                               // Use Expanded for placeholder content to fill space
+//                               else if (_activeTab == 'SLD')
+//                                 Expanded(
+//                                   child: _buildPlaceholderContent(
+//                                     'SLD View',
+//                                     AppAssets.noData,
+//                                   ),
+//                                 )
+//
+//                               // Use Expanded for placeholder content to fill space
+//                               else if (_activeTab == 'Data')
+//                                   Expanded(
+//                                     child: _buildPlaceholderContent(
+//                                       'Raw Data',
+//                                       AppAssets.noData,
+//                                     ),
+//                                   ),
+//
+//                             ],
+//                           ),
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               ),
+//
+//               // The shortcut buttons Grid is now at the bottom (fixed).
+//               SizedBox(height: 16.h),
+//               _buildShortcutButtonsGrid(),
+//               //SizedBox(height: 10.h), // Extra space at the bottom for safety
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+//
+//   // --- 2. Tab Bar Widget (No change) ---
+//   Widget _buildTabBar() {
+//     return Container(
+//       decoration: BoxDecoration(
+//         border: Border(bottom: BorderSide(color: AppColors.grey),
+//         ),
+//       ),
+//       child: Row(
+//         mainAxisAlignment: MainAxisAlignment.spaceAround,
+//         children: [
+//           _buildTabItem('Summary'),
+//           _buildTabItem('SLD'),
+//           _buildTabItem('Data'),
+//         ],
+//       ),
+//     );
+//   }
+//
+//   Widget _buildTabItem(String title) {
+//     // ... (unchanged)
+//     final isActive = _activeTab == title;
+//     return Expanded(
+//       child: GestureDetector(
+//         onTap: () {
+//           setState(() {
+//             _activeTab = title;
+//             if (title == 'Summary') {
+//               _activeToggle = 'Source'; // Default back to Source on Summary
+//             }
+//           });
+//         },
+//         child: Container(
+//           padding: EdgeInsets.symmetric(vertical: 8.h),
+//           decoration: BoxDecoration(
+//             color: isActive ? AppColors.primary : Colors.transparent,
+//             borderRadius: BorderRadius.only(
+//               topLeft: Radius.circular(11.r),
+//               topRight: Radius.circular(11.r),
+//             ),
+//           ),
+//           child: Center(
+//             child: Text(
+//               title,
+//               style: TextStyle(
+//                 color: isActive ? AppColors.white : AppColors.darkGrey,
+//                 fontSize: 16.sp,
+//                 fontWeight: FontWeight.w600,
+//               ),
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+//
+//   Widget _buildBlocContent() {
+//     return BlocBuilder<DashboardBloc, DashboardState>(
+//       builder: (context, state) {
+//
+//         List<SourceItem> mockSources = [];
+//         double mockTodayTotal = 5530.0;
+//
+//         if (state is DashboardLoading) {
+//           // Loading state must be wrapped in Expanded
+//           return Expanded(
+//             child: Padding(
+//               padding: EdgeInsets.only(top: 50.h),
+//               child: Center(
+//                 child: CircularProgressIndicator(color: AppColors.primary),
+//               ),
+//             ),
+//           );
+//         }
+//
+//         if (state is DashboardEmpty) {
+//           // Empty state must be wrapped in Expanded
+//           return Expanded(
+//             child: Padding(
+//               padding: EdgeInsets.only(top: 50.h),
+//               child: Center(
+//                 child: Image.asset(
+//                 AppAssets.noData,
+//                 width: 300.w,
+//                 height: 300.h,
+//                 fit: BoxFit.contain,
+//               ),),
+//             ),
+//           );
+//         }
+//
+//         return Flexible(
+//           fit: FlexFit.loose, // This is key for fixing the error in nested Columns
+//           child: Column(
+//             children: [
+//               // 1. FIXED HEIGHT HEADER (Title & Ring Chart) - Takes intrinsic height
+//               Column(
+//                 children: [
+//                   SizedBox(height: 5.h),
+//                   _buildElectricityTitle(),
+//                   SizedBox(height:10.h),// Fixed height
+//                   Container(
+//                     decoration: BoxDecoration(
+//                       color: AppColors.white,
+//                       border: Border.all(color: AppColors.grey, width: 0.6.w),
+//                     ),
+//                   ),
+//                   SizedBox(height: 10.h),
+//                   _buildRingChart(mockTodayTotal / 1000),
+//                   SizedBox(height: 16.h),
+//                   _buildSourceLoadToggle(),
+//                   SizedBox(height:5.h),
+//                   Container(
+//                     decoration: BoxDecoration(
+//                       color: AppColors.white,
+//                       border: Border.all(color: AppColors.grey, width: 0.6.w),
+//                     ),
+//                   ),
+//                   SizedBox(height:8.h),
+//                 ],
+//               ),
+//
+//               Expanded(
+//                 child: SingleChildScrollView(
+//                   child: Column(
+//                     children: [
+//
+//                       // List changes based on active toggle
+//                       if (_activeToggle == 'Source')
+//                         _buildSourcesList(mockSources)
+//                       else
+//                       // FIX: Corrected list logic to ensure only one list is built.
+//                         _buildLoadsList(mockSources),
+//
+//                       SizedBox(height: 10.h), // Padding at the bottom of the scroll view
+//                     ],
+//                   ),
+//                 ),
+//               ),
+//             ],
+//           ),
+//         );
+//
+//
+//       },
+//     );
+//   }
+//
+//   Widget _buildElectricityTitle() {
+//     // ... (unchanged)
+//     return Align(
+//       alignment: Alignment.center,
+//       child: Padding(
+//         padding: EdgeInsets.only(left: 10.w),
+//         child: Text(
+//           'Electricity',
+//           style: TextStyle(
+//             fontSize: 18.sp,
+//             fontWeight: FontWeight.w500,
+//             color: AppColors.grey,
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+//
+//   Widget _buildRingChart(double totalPower) {
+//     // ... (unchanged)
+//     return Center(
+//       child: Container(
+//         height: 140.h,
+//         width: 140.w,
+//         decoration: BoxDecoration(
+//           border: Border.all(color: AppColors.deepBlue, width: 15.w),
+//           shape: BoxShape.circle,
+//         ),
+//         child: Center(
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.center,
+//             children: [
+//               Text(
+//                 'Total Power',
+//                 style: TextStyle(
+//                   fontSize: 14.sp,
+//                   color: AppColors.darkGrey.withOpacity(0.7),
+//                 ),
+//               ),
+//               Text(
+//                 '5.53 kW',
+//                 style: TextStyle(
+//                   fontSize: 20.sp,
+//                   fontWeight: FontWeight.bold,
+//                   color: Colors.black,
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+//
+//   // --- Source/Load Toggle (No change) ---
+//   Widget _buildSourceLoadToggle() {
+//     // ... (unchanged)
+//     return Container(
+//       margin: EdgeInsets.symmetric(horizontal: 10.w),
+//       decoration: BoxDecoration(
+//         color: AppColors.lightGrey,
+//         borderRadius: BorderRadius.circular(30.r), // Highly rounded
+//       ),
+//       child: Row(
+//         children: [
+//           _buildToggleItemButton('Source'),
+//           SizedBox(width: 8.w),
+//           _buildToggleItemButton('Load'),
+//         ],
+//       ),
+//     );
+//   }
+//
+//   Widget _buildToggleItemButton(String title) {
+//     // ... (unchanged)
+//     final isActive = _activeToggle == title;
+//     return Expanded(
+//       child: GestureDetector(
+//         onTap: () {
+//           setState(() {
+//             _activeToggle = title;
+//           });
+//         },
+//         child: Container(
+//           padding: EdgeInsets.symmetric(vertical: 8.h),
+//           decoration: BoxDecoration(
+//             color: isActive ? AppColors.primary : AppColors.lightGrey,
+//             borderRadius: BorderRadius.circular(30.r),
+//           ),
+//           child: Center(
+//             child: Text(
+//               title,
+//               style: TextStyle(
+//                 color: isActive ? AppColors.white : AppColors.darkGrey,
+//                 fontSize: 16.sp,
+//                 fontWeight: FontWeight.w600,
+//               ),
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+//
+//   // --- List Views (No change) ---
+//   Widget _buildSourcesList(List<SourceItem> sources) {
+//     // ... (unchanged)
+//     return Column(
+//       children: [
+//         _buildSourceListItem(
+//           icon: AppAssets.solarCell,
+//           title: 'Data View',
+//           status: 'Active',
+//           iconColor: AppColors.primary,
+//           badgeColor: AppColors.purple,
+//         ),
+//         SizedBox(height: 10.h),
+//         _buildSourceListItem(
+//           icon: AppAssets.asset2,
+//           title: 'Data Type 2',
+//           status: 'Active',
+//           iconColor: AppColors.orange,
+//           badgeColor: AppColors.primary,
+//         ),
+//         SizedBox(height: 10.h),
+//         _buildSourceListItem(
+//           icon: AppAssets.power,
+//           title: 'Data Type 3',
+//           status: 'Inactive',
+//           iconColor: AppColors.red,
+//           badgeColor: AppColors.red,
+//         ),
+//       ],
+//     );
+//   }
+//
+//   Widget _buildLoadsList(List<SourceItem> sources) {
+//     // ... (unchanged)
+//     return Column(
+//       children: [
+//         _buildSourceListItem(
+//           icon: AppAssets.solarCell,
+//           title: 'Motor Load 1',
+//           status: 'Active',
+//           iconColor: Colors.red,
+//           badgeColor: AppColors.purple,
+//         ),
+//         SizedBox(height: 10.h),
+//         _buildSourceListItem(
+//           icon: AppAssets.power,
+//           title: 'Lighting Circuit',
+//           status: 'Active',
+//           iconColor: Colors.orange,
+//           badgeColor: AppColors.primary,
+//         ),
+//         SizedBox(height: 10.h),
+//         _buildSourceListItem(
+//           icon: AppAssets.asset2,
+//           title: 'AC Unit 3',
+//           status: 'Inactive',
+//           iconColor: AppColors.grey,
+//           badgeColor: AppColors.red,
+//         ),
+//       ],
+//     );
+//   }
+//
+//   Widget _buildSourceListItem({
+//     //required IconData icon,
+//     required String icon,
+//     required String title,
+//     required String status,
+//     required Color iconColor,
+//     required Color badgeColor,
+//   }) {
+//     // ... (unchanged)
+//     const String data1 = '55505.63';
+//     const String data2 = '58805.63';
+//     final bool isActive = status == 'Active';
+//
+//     return InkWell(
+//       onTap: () {
+//
+//           Navigator.push(
+//             context,
+//             MaterialPageRoute(
+//               builder: (context) => const DetailViewScreen(),
+//             ),
+//           );
+//
+//       },
+//       child: Container(
+//         padding: EdgeInsets.all(8.w),
+//         decoration: BoxDecoration(
+//           color: AppColors.lightGrey,
+//           borderRadius: BorderRadius.circular(4.r),
+//           border: Border.all(color: AppColors.grey, width: 1.w),
+//           boxShadow: [
+//             BoxShadow(
+//               color: Colors.black.withOpacity(0.05),
+//               blurRadius: 5,
+//               offset: const Offset(0, 2),
+//             ),
+//           ],
+//         ),
+//         child: Row(
+//           children: [
+//             Image.asset(
+//               icon,
+//               width: 30.w,
+//               height: 30.h,
+//               fit: BoxFit.contain,
+//             ),
+//             SizedBox(width: 15.w),
+//             Expanded(
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   Row(
+//                     children: [
+//                       Text(
+//                         title,
+//                         style: TextStyle(
+//                           fontSize: 16.sp,
+//                           fontWeight: FontWeight.bold,
+//                           color: AppColors.darkGrey,
+//                         ),
+//                       ),
+//                       SizedBox(width: 8.w),
+//                       Text(
+//                         isActive ? '(Active)' : '(Inactive)',
+//                         style: TextStyle(
+//                           color: isActive ? AppColors.primary : AppColors.red,
+//                           fontSize: 10.sp,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                   SizedBox(height: 5.h),
+//                   Text(
+//                     'Data 1 : $data1',
+//                     style: TextStyle(
+//                       fontSize: 14.sp,
+//                       color: AppColors.darkGrey.withOpacity(0.7),
+//                     ),
+//                   ),
+//                   Text(
+//                     'Data 2 : $data2',
+//                     style: TextStyle(
+//                       fontSize: 14.sp,
+//                       color: AppColors.darkGrey.withOpacity(0.7),
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//             Icon(
+//               Icons.arrow_forward_ios,
+//               color: AppColors.darkGrey.withOpacity(0.5),
+//               size: 20.sp,
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+//
+//   // --- Shortcut Buttons Grid (No change) ---
+//   Widget _buildShortcutButtonsGrid() {
+//     // ... (unchanged)
+//     final List<Map<String, dynamic>> shortcuts = [
+//       {
+//         'title': 'Analysis Pro',
+//         'icon': AppAssets.chart,
+//       },
+//       {
+//         'title': 'G. Generator',
+//         'icon':AppAssets.generator,
+//       },
+//       {
+//         'title': 'Plant Summery',
+//         'icon': AppAssets.charge,
+//       },
+//       {
+//         'title': 'Natural Gas',
+//         'icon': AppAssets.fire,
+//       },
+//       {
+//         'title': 'D. Generator',
+//         'icon': AppAssets.generator,
+//       },
+//       {
+//         'title': 'Water Process',
+//         'icon': AppAssets.waterProcess,
+//       },
+//     ];
+//
+//     return GridView.builder(
+//       shrinkWrap: true,
+//       //physics: const NeverScrollableScrollPhysics(),
+//       //padding: EdgeInsets.symmetric(horizontal: 10.w),
+//       itemCount: shortcuts.length,
+//       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+//         crossAxisCount: 2,
+//         childAspectRatio: 4,
+//         crossAxisSpacing: 10.w,
+//         mainAxisSpacing: 10.h,
+//       ),
+//       itemBuilder: (context, index) {
+//         final item = shortcuts[index];
+//         return _buildShortcutButton(
+//           item['title'] as String,
+//           item['icon'] as String,
+//         );
+//       },
+//     );
+//   }
+//
+//   Widget _buildShortcutButton(String title, String icon) {
+//     // ... (unchanged)
+//     return Container(
+//       padding: EdgeInsets.symmetric(horizontal: 10.w),
+//       decoration: BoxDecoration(
+//         color: AppColors.white,
+//         border: Border.all(color: AppColors.grey,width: 0.6.w),
+//         borderRadius: BorderRadius.circular(8.r),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.black.withOpacity(0.1),
+//             blurRadius: 10,
+//             offset: const Offset(0, 5),
+//           ),
+//         ],
+//       ),
+//         child: InkWell(
+//           onTap: () {
+//             // Placeholder functionality
+//           },
+//           borderRadius: BorderRadius.circular(15.r),
+//           child: Row(
+//             // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               Image.asset(
+//                 icon,
+//                 width: 20.w,
+//                 height: 20.h,
+//                 fit: BoxFit.contain,
+//               ),
+//               SizedBox(width: 8.h),
+//               Text(
+//                 title,
+//                 textAlign: TextAlign.center,
+//                 style: TextStyle(
+//                   fontSize: 14.sp,
+//                   //fontWeight: FontWeight.w600,
+//                   color: AppColors.darkGrey,
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//
+//     );
+//   }
+//
+//   // Placeholder content for SLD/Data tabs
+//   Widget _buildPlaceholderContent(String title, String icon) {
+//     return Container(
+//       //margin: EdgeInsets.symmetric(horizontal: 0.w),
+//       decoration: BoxDecoration(
+//         //color: AppColors.lightGrey,
+//         borderRadius: BorderRadius.circular(15.r),
+//       ),
+//       child: Column(
+//         mainAxisAlignment: MainAxisAlignment.center,
+//         crossAxisAlignment: CrossAxisAlignment.center,
+//         children: [
+//           Image.asset(
+//             icon,
+//             width: 100.w,
+//             height: 100.h,
+//             fit: BoxFit.contain,
+//           ),
+//           SizedBox(height: 10.h),
+//           Text(
+//             textAlign: TextAlign.center,
+//             '$title Content is under development.',
+//             style: TextStyle(fontSize: 18.sp, color: AppColors.grey),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+//
+//   Widget _buildEmptyState() {
+//     // ... (unchanged)
+//     return Column(
+//       mainAxisAlignment: MainAxisAlignment.center,
+//       children: [
+//         Icon(
+//           Icons.search_off,
+//           size: 100.sp,
+//           color: AppColors.grey.withOpacity(0.5),
+//         ),
+//         SizedBox(height: 20.h),
+//         Text(
+//           'No data to show, please wait.',
+//           style: TextStyle(fontSize: 18.sp, color: AppColors.grey),
+//           textAlign: TextAlign.center,
+//         ),
+//       ],
+//     );
+//   }
+// }
 
 
 
+
+
+///old
 // import 'package:flutter/material.dart';
 // import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:flutter_screenutil/flutter_screenutil.dart';
