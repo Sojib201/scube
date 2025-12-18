@@ -49,7 +49,6 @@ class DetailBlocContent extends StatelessWidget {
 
     return Stack(
       children: [
-        // 1. Main White Container (with Top Border Radius)
         Padding(
           padding: EdgeInsets.only(top: overlapOffset),
           child: Container(
@@ -66,7 +65,6 @@ class DetailBlocContent extends StatelessWidget {
             ),
             child: Column(
               children: [
-                // Fixed/Non-scrolling content
                 Column(
                   children: [
                     CircularChartWidget(
@@ -76,11 +74,9 @@ class DetailBlocContent extends StatelessWidget {
 
                     SizedBox(height: 30.h),
 
-                    // 3. Date Toggle (Today / Custom) - Only visible in Data View
                     if (isDataView)
                       DateToggleBar(activeDateType: state.activeDateType),
 
-                    // Date Range Picker - Only visible if Data View AND Custom Date is selected
                     if (isCustomDate && isDataView)
                       DateRangePickerWidget(
                         selectedDateRange: selectedDateRange,
@@ -92,7 +88,6 @@ class DetailBlocContent extends StatelessWidget {
 
                 SizedBox(height: 20.h),
 
-                // Scrollable Details List
                 Expanded(
                   child: SingleChildScrollView(
                     child: Padding(
@@ -118,7 +113,6 @@ class DetailBlocContent extends StatelessWidget {
           ),
         ),
 
-        // 2. Positioned Toggle Bar (Data View / Revenue View)
         Positioned(
           left: 16.w,
           right: 16.w,

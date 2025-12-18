@@ -16,8 +16,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     await Future.delayed(const Duration(seconds: 1));
 
     final sources = List.generate(
-      6,
-          (index) => SourceItem(
+      6, (index) => SourceItem(
         name: 'Source ${index + 1}',
         value: (index + 1) * 250,
       ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'input_decoration.dart';
 
 class UsernameField extends StatelessWidget {

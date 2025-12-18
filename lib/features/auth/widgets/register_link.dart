@@ -16,7 +16,6 @@ class RegisterLink extends StatelessWidget {
         ),
         InkWell(
           onTap: () {
-            // Add Register Now logic
           },
           child: Text(
             'Register Now',

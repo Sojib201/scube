@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// Helper class to structure data for the list items inside the chart card
 class DetailData {
   final String title;
   final String dataValue;
@@ -17,18 +16,17 @@ class DetailData {
   });
 }
 
-// Helper class to structure a complete chart/details block (like 'Energy Chart' or 'Data & Cost Info')
 class ChartDataBlock {
-  final String? mainValue; // e.g., '5.53' or '20.05' kW / '8897455' ৳
-  final String? title; // e.g., 'Energy Chart' or 'Data & Cost Info'
+  final String? mainValue;
+  final String? title;
   final List<DetailData> detailList;
-  final bool isExpanded; // NEW: To control the collapse/expand feature
+  final bool isExpanded;
 
   ChartDataBlock({
     this.mainValue,
     this.title,
     required this.detailList,
-    this.isExpanded = true, // Default to expanded
+    this.isExpanded = true,
   });
 
   ChartDataBlock copyWith({bool? isExpanded}) {
@@ -51,17 +49,14 @@ class DetailViewInitial extends DetailViewState {}
 class DetailViewLoading extends DetailViewState {}
 
 class DetailViewLoaded extends DetailViewState {
-  final String activeView; // 'Data View' or 'Revenue View'
-  final String activeDateType; // 'Today Data' or 'Custom Date Data'
+  final String activeView;
+  final String activeDateType;
 
-  // Overall Circular Chart values
   final String circularChartValue;
   final String circularChartUnit;
 
-  // List of data blocks (Chart/Details Cards)
   final List<ChartDataBlock> chartBlocks;
 
-  // For Custom Date Picker
   final DateTime? startDate;
   final DateTime? endDate;
 

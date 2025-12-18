@@ -55,7 +55,6 @@ class BuildLoginFormWidget extends StatelessWidget {
             ),
             SizedBox(height: AppSpacing.h28),
 
-            // Form Fields
             UsernameField(controller: usernameController),
             SizedBox(height: AppSpacing.h16),
             PasswordField(
@@ -66,12 +65,10 @@ class BuildLoginFormWidget extends StatelessWidget {
             const ForgotPasswordLink(),
             SizedBox(height: AppSpacing.h20),
 
-            // Login Button
             LoginButton(onLoginSubmitted: onLoginSubmitted),
 
             SizedBox(height: AppSpacing.h20),
 
-            // Register Link
             const RegisterLink(),
           ],
         ),

@@ -51,11 +51,22 @@ class ViewToggleBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 8.w,
-                height: 8.w,
+                padding: EdgeInsets.all(2.r),
                 decoration: BoxDecoration(
-                  color: isActive ? AppColors.primary : AppColors.grey,
+                  //color: isActive ? AppColors.primary : AppColors.red,
                   shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isActive ? AppColors.primary : AppColors.grey,
+                  )
+                ),
+                child: Container(
+                  //padding: EdgeInsets.all(12),
+                  width: 8.w,
+                  height: 8.w,
+                  decoration: BoxDecoration(
+                    color: isActive ? AppColors.primary : AppColors.grey,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
               SizedBox(width: 8.w),

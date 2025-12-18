@@ -19,11 +19,11 @@ class SummaryContent extends StatelessWidget {
     required this.onToggleChange,
   });
 
-  // Mock list items, replace with state data
   List<Map<String, dynamic>> get _mockSourceList => [
     {'icon': AppAssets.solarCell, 'title': 'Data View', 'status': 'Active', 'iconColor': AppColors.primary, 'badgeColor': AppColors.purple},
     {'icon': AppAssets.asset2, 'title': 'Data Type 2', 'status': 'Active', 'iconColor': AppColors.orange, 'badgeColor': AppColors.primary},
     {'icon': AppAssets.power, 'title': 'Data Type 3', 'status': 'Inactive', 'iconColor': AppColors.red, 'badgeColor': AppColors.red},
+    {'icon': AppAssets.solarCell, 'title': 'Total Solar', 'status': 'Active', 'iconColor': AppColors.primary, 'badgeColor': AppColors.purple},
   ];
 
   List<Map<String, dynamic>> get _mockLoadList => [
@@ -50,7 +50,7 @@ class SummaryContent extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 10.h),
-              RingChartWidget(totalPower: todayTotal / 1000), // Ring Chart
+              RingChartWidget(totalPower: todayTotal / 1000),
               SizedBox(height: 16.h),
               SourceLoadToggle(activeToggle: activeToggle, onToggleChange: onToggleChange), // Toggle
               SizedBox(height: 5.h),

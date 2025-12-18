@@ -22,7 +22,7 @@ class PlaceholderContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Image.asset(
-            AppAssets.noData, // Using the same noData asset
+            AppAssets.noData,
             width: 100.w,
             height: 100.h,
             fit: BoxFit.contain,

@@ -16,21 +16,44 @@ class DetailListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isRevenueView) {
-      // Revenue View style (simple text list)
       return Padding(
-        padding: EdgeInsets.only(bottom: 10.h),
+        padding: EdgeInsets.only(bottom: 10.h,left: 12.w, right: 12.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '${data.title} : ${data.dataValue} (${data.percentage})',
-              style: TextStyle(fontSize: 14.sp, color: AppColors.darkGrey, fontWeight: FontWeight.w500),
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: "${data.title} :",
+                    style: TextStyle(fontSize: 14.sp, color: AppColors.grey),
+                  ),
+                  TextSpan(
+                    text: '  ${data.dataValue} (${data.percentage})',
+                    style: TextStyle(fontSize: 14.sp, color: AppColors.black,fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
             ),
+
             SizedBox(height: 2.h),
-            Text(
-              'Cost ${data.title.substring(data.title.length - 1)} : ${data.costValue} ৳',
-              style: TextStyle(fontSize: 14.sp, color: AppColors.darkGrey),
+
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Cost ${data.title.substring(data.title.length - 1)} :',
+                    style: TextStyle(fontSize: 14.sp, color: AppColors.grey),
+                  ),
+                  TextSpan(
+                    text: ' ${data.costValue} ৳',
+                    style: TextStyle(fontSize: 14.sp, color: AppColors.black,fontWeight: FontWeight.w500),
+                  ),
+
+                ],
+              ),
             ),
+
             if (data.title != 'Data 4')
               SizedBox(height: 8.h),
           ],
@@ -38,30 +61,28 @@ class DetailListItem extends StatelessWidget {
       );
     }
 
-    // Data View style (with dot, container, and arrow)
     return Padding(
       padding: EdgeInsets.only(bottom: 10.h),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
+        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 8.w),
         decoration: BoxDecoration(
           color: AppColors.white,
-          border: Border.all(color: AppColors.lightGrey, width: 1.w),
+          border: Border.all(color: AppColors.grey, width: 1.w),
           borderRadius: BorderRadius.circular(8.r),
         ),
         child: Row(
           children: [
-            // Left Indicator (Colored dot and Title)
-            Row(
+            Column(
               children: [
                 Container(
-                  width: 6.w,
-                  height: 6.w,
+                  width: 10.w,
+                  height: 10.w,
                   decoration: BoxDecoration(
                     color: data.color,
                     shape: BoxShape.circle,
                   ),
                 ),
-                SizedBox(width: 8.w),
+                SizedBox(height: 6.h),
                 Text(
                   data.title,
                   style: TextStyle(
@@ -72,9 +93,20 @@ class DetailListItem extends StatelessWidget {
                 ),
               ],
             ),
+            SizedBox(width: 10.w),
+
+            Container(
+              height: 50.h,
+              width: 0.1.w,
+              decoration: BoxDecoration(
+                color: AppColors.grey.shade50,
+                border: Border.all(
+                  width: 0.5.w
+                )
+              ),
+            ),
             SizedBox(width: 15.w),
 
-            // Middle Data (Data and Cost)
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,26 +115,27 @@ class DetailListItem extends StatelessWidget {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          text: 'Data: ',
+                          text: 'Data   : ',
                           style: TextStyle(fontSize: 14.sp, color: AppColors.grey),
                         ),
                         TextSpan(
                           text: '${data.dataValue} (${data.percentage})',
-                          style: TextStyle(fontSize: 14.sp, color: AppColors.darkGrey),
+                          style: TextStyle(fontSize: 14.sp, color: AppColors.black,fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),
                   ),
+                  SizedBox(height: 8.h,),
                   RichText(
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          text: 'Cost: ',
+                          text: 'Cost   : ',
                           style: TextStyle(fontSize: 14.sp, color: AppColors.grey),
                         ),
                         TextSpan(
                           text: '${data.costValue} ৳',
-                          style: TextStyle(fontSize: 14.sp, color: AppColors.darkGrey),
+                          style: TextStyle(fontSize: 14.sp, color: AppColors.black,fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),
@@ -111,7 +144,6 @@ class DetailListItem extends StatelessWidget {
               ),
             ),
 
-            // Right Arrow
             Icon(
               Icons.arrow_forward_ios,
               color: AppColors.grey,

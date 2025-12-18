@@ -1,6 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter/material.dart';
-
 import '../../../core/constants/app_colors.dart';
 import 'detail_event.dart';
 import 'detail_state.dart';
@@ -13,7 +11,6 @@ class DetailViewBloc extends Bloc<DetailViewEvent, DetailViewState> {
     on<ToggleChartExpand>(_onToggleChartExpand);
   }
 
-  // Helper to create mock Data View list
   List<DetailData> _getMockDataList() {
     return [
       DetailData(
@@ -47,37 +44,35 @@ class DetailViewBloc extends Bloc<DetailViewEvent, DetailViewState> {
     ];
   }
 
-  // Helper to create mock Revenue View list (Screen 2/3 data)
   List<DetailData> _getMockRevenueList() {
-    // Note: Data in Screen 2/3 shows the same Cost and Data values for all 4 items
     return [
       DetailData(
         title: 'Data 1',
         dataValue: '2798.50',
         costValue: '35689',
         percentage: '20.53%',
-        color: AppColors.red, // Mock color
+        color: AppColors.red,
       ),
       DetailData(
         title: 'Data 2',
         dataValue: '2798.50',
         costValue: '35689',
         percentage: '20.53%',
-        color: AppColors.grey, // Mock color
+        color: AppColors.grey,
       ),
       DetailData(
         title: 'Data 3',
         dataValue: '2798.50',
         costValue: '35689',
         percentage: '20.53%',
-        color: AppColors.yellow, // Mock color
+        color: AppColors.yellow,
       ),
       DetailData(
         title: 'Data 4',
         dataValue: '2798.50',
         costValue: '35689',
         percentage: '20.53%',
-        color: AppColors.primary, // Mock color
+        color: AppColors.primary,
       ),
     ];
   }
@@ -87,7 +82,6 @@ class DetailViewBloc extends Bloc<DetailViewEvent, DetailViewState> {
     emit(DetailViewLoading());
     await Future.delayed(const Duration(milliseconds: 500));
 
-    // Default Data View blocks (Screen 1)
     final dataBlocks = [
       ChartDataBlock(
         mainValue: '5.53',
@@ -112,7 +106,7 @@ class DetailViewBloc extends Bloc<DetailViewEvent, DetailViewState> {
       String newCircularValue;
       String newCircularUnit;
       List<ChartDataBlock> newChartBlocks;
-      String newDateType = 'Today Data'; // Revenue View always resets to Today Data
+      String newDateType = 'Today Data';
 
       if (event.view == 'Data View') {
         newCircularValue = '55.00';
@@ -121,11 +115,10 @@ class DetailViewBloc extends Bloc<DetailViewEvent, DetailViewState> {
           ChartDataBlock(mainValue: '5.53', title: 'Energy Chart', detailList: _getMockDataList()),
         ];
 
-      } else { // Revenue View (Screen 2/3)
+      } else {
         newCircularValue = '8897455';
         newCircularUnit = 'tk';
         newChartBlocks = [
-          // Revenue View starts expanded (Screen 2)
           ChartDataBlock(mainValue: '8897455', title: 'Data & Cost Info', detailList: _getMockRevenueList(), isExpanded: true),
         ];
       }
@@ -145,7 +138,6 @@ class DetailViewBloc extends Bloc<DetailViewEvent, DetailViewState> {
     if (currentState is DetailViewLoaded) {
       if (event.dateType == 'Custom Date Data' && currentState.activeView == 'Data View') {
 
-        // Mock data for Screen 4 (Two data blocks)
         final customDataBlocks = [
           ChartDataBlock(mainValue: '20.05', title: 'Energy Chart', detailList: _getMockDataList(), isExpanded: true),
           ChartDataBlock(mainValue: '5.53', title: 'Energy Chart', detailList: _getMockDataList(), isExpanded: true),
@@ -158,7 +150,6 @@ class DetailViewBloc extends Bloc<DetailViewEvent, DetailViewState> {
           chartBlocks: customDataBlocks,
         ));
       } else {
-        // Reset to Today Data / Data View (Screen 1 default)
         final defaultDataBlocks = [
           ChartDataBlock(mainValue: '5.53', title: 'Energy Chart', detailList: _getMockDataList(), isExpanded: true),
         ];
@@ -175,12 +166,10 @@ class DetailViewBloc extends Bloc<DetailViewEvent, DetailViewState> {
   void _onToggleChartExpand(ToggleChartExpand event, Emitter<DetailViewState> emit) {
     final currentState = state;
     if (currentState is DetailViewLoaded) {
-      // Create a mutable copy of the list
       final List<ChartDataBlock> updatedBlocks = List.from(currentState.chartBlocks);
 
       if (event.blockIndex >= 0 && event.blockIndex < updatedBlocks.length) {
         final currentBlock = updatedBlocks[event.blockIndex];
-        // Toggle the isExpanded state for the specific block
         updatedBlocks[event.blockIndex] = currentBlock.copyWith(
           isExpanded: !currentBlock.isExpanded,
         );

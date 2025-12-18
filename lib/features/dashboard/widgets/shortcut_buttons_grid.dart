@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:scub/features/dashboard/view/empty_dashboard.dart';
 import '../../../../core/constants/app_assets.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../details/view/details_view_screen.dart';
 
 class ShortcutButtonsGrid extends StatelessWidget {
   const ShortcutButtonsGrid({super.key});

@@ -23,7 +23,7 @@ class DashboardError extends DashboardState {
   DashboardError(this.message);
 }
 
-// Model
+
 class SourceItem {
   final String name;
   final int value;

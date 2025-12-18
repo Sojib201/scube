@@ -36,7 +36,6 @@ class CircularChartWidget extends StatelessWidget {
                 sectionsSpace: 0,
                 centerSpaceRadius: 60.r,
                 sections: [
-                  // Active Data Arc
                   PieChartSectionData(
                     value: activeFill,
                     color: primaryColor,
@@ -44,7 +43,6 @@ class CircularChartWidget extends StatelessWidget {
                     title: '',
                     showTitle: false,
                   ),
-                  // Background Arc
                   PieChartSectionData(
                     value: remainingFill,
                     color: primaryColor.withOpacity(0.2),
@@ -55,7 +53,6 @@ class CircularChartWidget extends StatelessWidget {
                 ],
               ),
             ),
-            // The text in the center
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

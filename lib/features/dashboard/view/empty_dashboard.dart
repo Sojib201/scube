@@ -44,7 +44,7 @@ class _DashboardScreenState extends State<EmptyDashboardScreen> {
             },
           ),
         ],
-      ), // 1. AppBar Widget
+      ),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 40.h),
