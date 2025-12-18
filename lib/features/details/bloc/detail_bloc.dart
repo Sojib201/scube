@@ -163,6 +163,7 @@ class DetailViewBloc extends Bloc<DetailViewEvent, DetailViewState> {
     }
   }
 
+
   void _onToggleChartExpand(ToggleChartExpand event, Emitter<DetailViewState> emit) {
     final currentState = state;
     if (currentState is DetailViewLoaded) {
